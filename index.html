@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoltCharge | Smart EV Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-neon: #00ffcc;
+            --secondary-neon: #7000ff;
+            --dark-bg: #0a0a0c;
+            --card-bg: #16161a;
+        }
+
+        body {
+            font-family: 'Space+Grotesk', sans-serif;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .neon-border {
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #00ffcc, #7000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .charging-wave {
+            background: linear-gradient(0deg, rgba(0, 255, 204, 0.2) 0%, transparent 100%);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: height 0.5s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary-neon);
+            border-bottom: 2px solid var(--primary-neon);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-neon); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-neon), #00b38f);
+            color: black;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 204, 0.4);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .grid-mesh {
+            background-image: radial-gradient(circle, #ffffff10 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .pulse { animation: pulse 2s infinite; }
+    </style>
+</head>
+<body class="grid-mesh">
+
+    <!-- Mobile Navigation Top -->
+    <nav class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-lg border-b border-white/10 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-[#00ffcc] to-[#7000ff] rounded-lg flex items-center justify-center">
+                <i class="fas fa-bolt text-black"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tighter">VOLT<span class="text-[#00ffcc]">CHARGE</span></span>
+        </div>
+        <div class="hidden md:flex gap-8">
+            <a href="#" onclick="showPage('home')" class="nav-item active hover:text-[#00ffcc] transition">Home</a>
+            <a href="#" onclick="showPage('dashboard')" class="nav-item hover:text-[#00ffcc] transition">Charging</a>
+            <a href="#" onclick="showPage('history')" class="nav-item hover:text-[#00ffcc] transition">History</a>
+            <a href="#" onclick="showPage('locator')" class="nav-item hover:text-[#00ffcc] transition">Map</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] text-gray-500 uppercase">Wallet</p>
+                <p class="text-sm font-mono text-[#00ffcc]">₹1,240.50</p>
+            </div>
+            <button onclick="showPage('profile')" class="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-gray-800">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto p-4 md:p-8 min-h-[calc(100vh-80px)]">
+
+        <!-- PAGE: HOME -->
+        <div id="page-home" class="page-content space-y-8">
+            <!-- Hero Banner -->
+            <section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-black to-[#16161a] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between border border-white/5">
+                <div class="z-10 space-y-6 md:w-1/2">
+                    <div class="inline-flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 text-[#00ffcc] text-xs font-bold uppercase tracking-widest">
+                        <span class="w-2 h-2 rounded-full bg-[#00ffcc] pulse"></span> Station ID: MH-2410
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-bold leading-tight">Fastest Charging <br><span class="gradient-text">In The Matrix</span></h1>
+                    <p class="text-gray-400 text-lg max-w-md">Experience wireless and wired IoT-enabled charging for the next generation of electric mobility. Real-time monitoring via ESP32.</p>
+                    <div class="flex gap-4">
+                        <button onclick="showPage('setup')" class="btn-primary px-8 py-4 rounded-xl flex items-center gap-2">
+                            START CHARGING <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative mt-8 md:mt-0">
+                    <i class="fas fa-car-side text-[12rem] text-white/5 absolute -top-10 -right-10 transform -rotate-12"></i>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3002/3002715.png" alt="EV" class="w-64 h-64 object-contain filter drop-shadow-[0_0_30px_rgba(0,255,204,0.3)]">
+                </div>
+            </section>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-[#16161a] p-6 rounded-2xl border border-white/5">
+                    <p class="text-gray-500 text-sm">System Status</p>
+                    <p class="text-xl font-bold text-green-400">ONLINE</p>
+                </div>
+                <div class="bg-[#16161a] p-6 rounded-2xl border border-white/5">
+                    <p class="text-gray-500 text-sm">Solar Power</p>
+                    <p class="text-xl font-bold text-yellow-400">64% Supply</p>
+                </div>
+                <div class="bg-[#16161a] p-6 rounded-2xl border border-white/5">
+                    <p class="text-gray-500 text-sm">CO2 Saved</p>
+                    <p class="text-xl font-bold text-[#00ffcc]">42.8 kg</p>
+                </div>
+                <div class="bg-[#16161a] p-6 rounded-2xl border border-white/5">
+                    <p class="text-gray-500 text-sm">Price/kWh</p>
+                    <p class="text-xl font-bold">₹12.50</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: SETUP CHARGING -->
+        <div id="page-setup" class="page-content hidden max-w-2xl mx-auto py-10">
+            <div class="bg-[#16161a] rounded-3xl border border-white/10 overflow-hidden">
+                <div class="p-8 border-b border-white/10">
+                    <h2 class="text-2xl font-bold">Initialize Charging Session</h2>
+                    <p class="text-gray-500">Configure your charging preferences</p>
+                </div>
+                <div class="p-8 space-y-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Vehicle ID / QR Scan</label>
+                        <div class="flex gap-2">
+                            <input type="text" value="EV-TX-7782" class="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-[#00ffcc] transition">
+                            <button class="bg-white/5 p-3 rounded-xl border border-white/10 hover:bg-white/10">
+                                <i class="fas fa-qrcode text-[#00ffcc]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Charging Type</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <button onclick="selectOption(this, 'type')" class="option-btn bg-black border border-[#00ffcc] p-3 rounded-xl text-center active-opt">Wireless</button>
+                                <button onclick="selectOption(this, 'type')" class="option-btn bg-black border border-white/10 p-3 rounded-xl text-center">Plug-in</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Mode</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <button onclick="selectOption(this, 'mode')" class="option-btn bg-black border border-[#00ffcc] p-3 rounded-xl text-center active-opt">Fast (80kW)</button>
+                                <button onclick="selectOption(this, 'mode')" class="option-btn bg-black border border-white/10 p-3 rounded-xl text-center">Normal (22kW)</button>
+                                <button onclick="selectOption(this, 'mode')" class="option-btn bg-black border border-white/10 p-3 rounded-xl text-center text-green-400">Eco (Green)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="startCharging()" class="w-full btn-primary py-4 rounded-xl text-lg mt-4">
+                        CONFIRM & START
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: LIVE DASHBOARD -->
+        <div id="page-dashboard" class="page-content hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-bold">Live Session <span class="text-sm font-normal text-gray-500">#CHG-8821</span></h2>
+                <div class="flex gap-2">
+                    <button onclick="toggleEmergency()" id="emer-btn" class="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg text-sm font-bold uppercase hover:bg-red-500 hover:text-white transition">
+                        Emergency Stop
+                    </button>
+                    <button onclick="stopCharging()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-sm font-bold uppercase">
+                        Stop
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Status -->
+                <div class="lg:col-span-1 bg-[#16161a] rounded-3xl border border-white/10 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div id="charge-level-bg" class="charging-wave" style="height: 45%;"></div>
+                    <div class="relative z-10 text-center">
+                        <div class="text-8xl font-black mb-2" id="live-percent">45%</div>
+                        <p class="text-[#00ffcc] font-bold tracking-widest uppercase">Charging Active</p>
+                        <div class="mt-8 space-y-2">
+                            <p class="text-sm text-gray-400">Est. time remaining</p>
+                            <p class="text-2xl font-mono" id="live-timer">00:42:15</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Telemetry -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-[#16161a] p-6 rounded-2xl border border-white/10">
+                            <p class="text-gray-500 text-xs mb-1">Voltage</p>
+                            <p class="text-2xl font-mono text-[#00ffcc]" id="live-v">400.2V</p>
+                        </div>
+                        <div class="bg-[#16161a] p-6 rounded-2xl border border-white/10">
+                            <p class="text-gray-500 text-xs mb-1">Current</p>
+                            <p class="text-2xl font-mono text-[#00ffcc]" id="live-a">32.5A</p>
+                        </div>
+                        <div class="bg-[#16161a] p-6 rounded-2xl border border-white/10">
+                            <p class="text-gray-500 text-xs mb-1">Power</p>
+                            <p class="text-2xl font-mono text-[#00ffcc]" id="live-w">13.0kW</p>
+                        </div>
+                        <div class="bg-[#16161a] p-6 rounded-2xl border border-white/10">
+                            <p class="text-gray-500 text-xs mb-1">Temp</p>
+                            <p class="text-2xl font-mono text-[#00ffcc]" id="live-t">34.1°C</p>
+                        </div>
+                    </div>
+
+                    <!-- Graph Container -->
+                    <div class="bg-[#16161a] p-6 rounded-3xl border border-white/10">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold">Real-time Power Delivery</h3>
+                            <div class="flex gap-4 text-xs">
+                                <span class="flex items-center gap-1 text-[#00ffcc]"><span class="w-2 h-2 rounded-full bg-[#00ffcc]"></span> Power (kW)</span>
+                            </div>
+                        </div>
+                        <canvas id="chargingChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alignment & Monitoring (Wireless Specific) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-[#16161a] p-6 rounded-3xl border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold">Coil Alignment</p>
+                            <p class="text-xs text-gray-500">Precision optimization active</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="w-[98%] h-full bg-[#00ffcc]"></div>
+                        </div>
+                        <span class="text-sm font-bold text-[#00ffcc]">98%</span>
+                    </div>
+                </div>
+                <div class="bg-[#16161a] p-6 rounded-3xl border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 border border-green-500/20">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold">Safety Protocols</p>
+                            <p class="text-xs text-gray-500">Overvoltage protection active</p>
+                        </div>
+                    </div>
+                    <span class="status-badge bg-green-500/20 text-green-500 border border-green-500/30 font-bold">Secure</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: BILLING -->
+        <div id="page-billing" class="page-content hidden max-w-lg mx-auto py-10">
+            <div id="bill-container" class="bg-white text-black p-10 rounded-3xl shadow-2xl relative overflow-hidden">
+                <!-- Bill Header -->
+                <div class="flex justify-between items-start mb-8">
+                    <div>
+                        <h2 class="text-2xl font-black uppercase italic tracking-tighter">Tax Invoice</h2>
+                        <p class="text-xs text-gray-500">Inv No: #VC-9921-X</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xl font-bold">VoltCharge</div>
+                        <p class="text-[10px] text-gray-500">IITB Techfest Hub</p>
+                    </div>
+                </div>
+
+                <!-- Bill Details -->
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-500">Energy Consumed</span>
+                        <span class="font-bold" id="bill-energy">42.5 kWh</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-500">Rate per Unit</span>
+                        <span class="font-bold">₹12.50</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-500">Subtotal</span>
+                        <span class="font-bold" id="bill-subtotal">₹531.25</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-500">GST (18%)</span>
+                        <span class="font-bold" id="bill-tax">₹95.62</span>
+                    </div>
+                    <div class="flex justify-between pt-4">
+                        <span class="text-lg font-bold">Total Payable</span>
+                        <span class="text-2xl font-black" id="bill-total">₹626.87</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center space-y-4">
+                    <div class="p-4 bg-gray-100 rounded-xl">
+                        <p class="text-xs text-gray-500 mb-2">SCAN TO PAY</p>
+                        <div class="w-32 h-32 bg-gray-300 mx-auto rounded-lg flex items-center justify-center border-2 border-white">
+                            <i class="fas fa-qrcode text-4xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="window.print()" class="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm">PRINT PDF</button>
+                        <button onclick="showPage('home')" class="flex-1 border border-black py-3 rounded-xl font-bold text-sm">DISMISS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: HISTORY -->
+        <div id="page-history" class="page-content hidden space-y-6">
+            <h2 class="text-3xl font-bold">Charging History</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left bg-[#16161a] rounded-2xl overflow-hidden border border-white/10">
+                    <thead class="bg-white/5 text-gray-400 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="p-6">Date & Time</th>
+                            <th class="p-6">Vehicle</th>
+                            <th class="p-6">Energy</th>
+                            <th class="p-6">Amount</th>
+                            <th class="p-6">Status</th>
+                            <th class="p-6">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-6">22 Oct, 2023 | 14:20</td>
+                            <td class="p-6">EV-TX-7782</td>
+                            <td class="p-6 font-mono">18.4 kWh</td>
+                            <td class="p-6 font-bold">₹245.00</td>
+                            <td class="p-6"><span class="status-badge bg-green-500/10 text-green-500 border border-green-500/20">Success</span></td>
+                            <td class="p-6"><button class="text-[#00ffcc] text-sm underline">Invoice</button></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-6">19 Oct, 2023 | 09:15</td>
+                            <td class="p-6">EV-TX-7782</td>
+                            <td class="p-6 font-mono">32.1 kWh</td>
+                            <td class="p-6 font-bold">₹412.00</td>
+                            <td class="p-6"><span class="status-badge bg-green-500/10 text-green-500 border border-green-500/20">Success</span></td>
+                            <td class="p-6"><button class="text-[#00ffcc] text-sm underline">Invoice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Mobile Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0c]/90 backdrop-blur-xl border-t border-white/10 grid grid-cols-4 py-3 z-50">
+        <button onclick="showPage('home')" class="flex flex-col items-center gap-1 text-[#00ffcc]">
+            <i class="fas fa-home"></i><span class="text-[10px]">Home</span>
+        </button>
+        <button onclick="showPage('setup')" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-bolt"></i><span class="text-[10px]">Charge</span>
+        </button>
+        <button onclick="showPage('history')" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-history"></i><span class="text-[10px]">Logs</span>
+        </button>
+        <button onclick="showPage('locator')" class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fas fa-map-marker-alt"></i><span class="text-[10px]">Nearby</span>
+        </button>
+    </div>
+
+    <script>
+        // State Management
+        let chargingActive = false;
+        let batteryLevel = 45;
+        let energyConsumed = 0;
+        let timerInterval;
+        let chartInstance;
+
+        // Navigation System
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            
+            // Update Nav Active state
+            document.querySelectorAll('.nav-item').forEach(link => {
+                if(link.getAttribute('onclick')?.includes(pageId)) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            if(pageId === 'dashboard' && chargingActive) {
+                initChart();
+            }
+        }
+
+        // Selection Handlers
+        function selectOption(btn, category) {
+            const btns = btn.parentElement.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                b.classList.remove('border-[#00ffcc]', 'active-opt');
+                b.classList.add('border-white/10');
+            });
+            btn.classList.add('border-[#00ffcc]', 'active-opt');
+            btn.classList.remove('border-white/10');
+        }
+
+        // Charging Simulation Logic
+        function startCharging() {
+            chargingActive = true;
+            showPage('dashboard');
+            startSimulation();
+            initChart();
+        }
+
+        function stopCharging() {
+            chargingActive = false;
+            clearInterval(timerInterval);
+            
+            // Prep Billing
+            const subtotal = (energyConsumed * 12.5).toFixed(2);
+            const tax = (subtotal * 0.18).toFixed(2);
+            const total = (parseFloat(subtotal) + parseFloat(tax)).toFixed(2);
+
+            document.getElementById('bill-energy').innerText = energyConsumed.toFixed(2) + " kWh";
+            document.getElementById('bill-subtotal').innerText = "₹" + subtotal;
+            document.getElementById('bill-tax').innerText = "₹" + tax;
+            document.getElementById('bill-total').innerText = "₹" + total;
+
+            showPage('billing');
+        }
+
+        function startSimulation() {
+            timerInterval = setInterval(() => {
+                if(batteryLevel < 100) {
+                    batteryLevel += 0.05;
+                    energyConsumed += 0.01;
+                    
+                    // Update UI
+                    document.getElementById('live-percent').innerText = Math.floor(batteryLevel) + "%";
+                    document.getElementById('charge-level-bg').style.height = batteryLevel + "%";
+                    
+                    // Jitter values to simulate real IoT data
+                    document.getElementById('live-v').innerText = (400 + Math.random() * 2).toFixed(1) + "V";
+                    document.getElementById('live-a').innerText = (32 + Math.random() * 1).toFixed(1) + "A";
+                    document.getElementById('live-w').innerText = (12.8 + Math.random() * 0.4).toFixed(1) + "kW";
+                    document.getElementById('live-t').innerText = (34 + Math.random() * 0.5).toFixed(1) + "°C";
+
+                    // Update Chart
+                    if(chartInstance) {
+                        const val = 12.8 + Math.random() * 0.4;
+                        chartInstance.data.datasets[0].data.push(val);
+                        chartInstance.data.labels.push("");
+                        if(chartInstance.data.datasets[0].data.length > 20) {
+                            chartInstance.data.datasets[0].data.shift();
+                            chartInstance.data.labels.shift();
+                        }
+                        chartInstance.update('none');
+                    }
+                } else {
+                    stopCharging();
+                }
+            }, 1000);
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('chargingChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(20).fill(""),
+                    datasets: [{
+                        label: 'Power Delivery (kW)',
+                        data: Array(20).fill(12.8),
+                        borderColor: '#00ffcc',
+                        borderWidth: 2,
+                        fill: true,
+                        backgroundColor: 'rgba(0, 255, 204, 0.05)',
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            display: true, 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#666' }
+                        },
+                        x: { display: false }
+                    },
+                    animation: false
+                }
+            });
+        }
+
+        function toggleEmergency() {
+            const btn = document.getElementById('emer-btn');
+            if(btn.innerText === "Emergency Stop") {
+                btn.innerText = "System Locked";
+                btn.classList.add('bg-red-600', 'text-white');
+                chargingActive = false;
+                clearInterval(timerInterval);
+                setTimeout(() => {
+                    alert("Emergency Stop Engaged. Technical support notified.");
+                }, 100);
+            }
+        }
+
+        // Initialize view
+        window.onload = () => {
+            console.log("System Ready. Connected to Virtual ESP32 Gateway.");
+        };
+    </script>
+</body>
+</html>
